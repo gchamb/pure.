@@ -4,9 +4,13 @@ go 1.21
 
 toolchain go1.22.1
 
-require github.com/wailsapp/wails/v2 v2.9.2
+require (
+	github.com/wailsapp/wails v1.16.9
+	github.com/wailsapp/wails/v2 v2.9.2
+)
 
 require (
+	github.com/abadojack/whatlanggo v1.0.1 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
@@ -24,6 +28,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/samber/lo v1.38.1 // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/tkrajina/go-reflector v0.5.6 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
