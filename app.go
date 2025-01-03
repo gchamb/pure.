@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
-	"github.com/wailsapp/wails/runtime"
 )
 
 // App struct
