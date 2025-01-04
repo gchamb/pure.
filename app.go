@@ -72,7 +72,7 @@ func (a *App) LoadDirectory(directoryPath string) []FileDetails {
 	var fileDetails []FileDetails
 	entries, err := os.ReadDir(directoryPath)
 	if err != nil {
-		// fmt.Println(err.Error())
+		fmt.Println(err.Error())
 		return fileDetails
 	}
 

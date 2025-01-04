@@ -4,8 +4,10 @@ type EditorViewProps = {
 
 export default function EditorViewer(props: EditorViewProps) {
   return (
-    <div>
-      <code>{props.fileContents}</code>
+    <div className="">
+      <pre className="text-left">
+        <code>{props.fileContents}</code>
+      </pre>
     </div>
   );
 }

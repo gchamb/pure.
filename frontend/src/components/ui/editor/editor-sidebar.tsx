@@ -25,22 +25,29 @@ export function EditorSidebar(props: EditorSidebarProps) {
           {/* <SidebarGroupLabel>Application</SidebarGroupLabel> */}
           <SidebarGroupContent>
             <SidebarMenu>
-              {props.directoryContents.map((item) => (
-                <SidebarMenuItem key={item.name}>
-                  <SidebarMenuButton
-                    asChild
-                    className="cursor-pointer"
-                    onClick={() => props.itemClicked(item.path)}
-                  >
-                    <div>
-                      {item.isDir && (
-                        <Folder className="text-black" size={12} />
-                      )}
-                      <span>{item.name}</span>
-                    </div>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {props.directoryContents
+                .sort((a, b) => {
+                  const aVal = a.isDir ? 1 : 0;
+                  const bVal = b.isDir ? 1 : 0;
+
+                  return bVal - aVal;
+                })
+                .map((item) => (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton
+                      asChild
+                      className="cursor-pointer"
+                      onClick={() => props.itemClicked(item.path)}
+                    >
+                      <div>
+                        {item.isDir && (
+                          <Folder className="text-black" size={12} />
+                        )}
+                        <span>{item.name}</span>
+                      </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

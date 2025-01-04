@@ -38,7 +38,7 @@ export default function Editor() {
   }, []);
 
   return (
-    <div className="h-screen">
+    <div className="h-screen flex gap-10">
       <EditorSidebar
         directoryContents={directoryContents}
         itemClicked={(path) => getFileContents(path)}
