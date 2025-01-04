@@ -1,5 +1,21 @@
 export namespace main {
 	
+	export class FileDetails {
+	    name: string;
+	    size: number;
+	    isDir: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new FileDetails(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.size = source["size"];
+	        this.isDir = source["isDir"];
+	    }
+	}
 	export class LoadDirs {
 	    Dirs: string[];
 	    currentPath: string;

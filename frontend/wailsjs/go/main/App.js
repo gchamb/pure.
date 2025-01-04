@@ -5,3 +5,7 @@
 export function LoadDirectories(arg1) {
   return window['go']['main']['App']['LoadDirectories'](arg1);
 }
+
+export function LoadDirectory(arg1) {
+  return window['go']['main']['App']['LoadDirectory'](arg1);
+}

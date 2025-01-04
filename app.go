@@ -15,6 +15,11 @@ type LoadDirs struct {
 	Dirs        []string `json:dirs`
 	CurrentPath string   `json:"currentPath"`
 }
+type FileDetails struct {
+	Name     string `json:"name"`
+	Size     int64  `json:"size"`
+	IsDir    bool   `json:"isDir"`
+}
 
 // NewApp creates a new App application struct
 func NewApp() *App {
@@ -27,7 +32,7 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-func (a *App) LoadDirectories(directory string)LoadDirs{
+func (a *App) LoadDirectories(directory string) LoadDirs {
 	// if the directory is empty string use home directory
 	var selectedDir string
 	dirNames := make([]string, 10)
@@ -35,7 +40,7 @@ func (a *App) LoadDirectories(directory string)LoadDirs{
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			fmt.Println(err.Error())
-			return LoadDirs{} 
+			return LoadDirs{}
 		}
 
 		selectedDir = homeDir
@@ -55,7 +60,28 @@ func (a *App) LoadDirectories(directory string)LoadDirs{
 	}
 
 	return LoadDirs{
-		Dirs: dirNames,
+		Dirs:        dirNames,
 		CurrentPath: selectedDir,
 	}
+}
+
+func (a *App) LoadDirectory(directoryPath string) []FileDetails {
+	
+	var fileDetails []FileDetails
+	entries, err := os.ReadDir(directoryPath)
+	if err != nil {
+		fmt.Println(err.Error())
+		return fileDetails
+	}
+
+	for _, entry := range entries {
+		if details, err := entry.Info(); err == nil {
+			fileDetails = append(fileDetails, FileDetails{
+				Name:  entry.Name(),
+				IsDir: entry.IsDir(),
+				Size:  details.Size(),
+			})
+		}
+	}
+	return fileDetails
 }

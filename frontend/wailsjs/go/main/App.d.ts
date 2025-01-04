@@ -3,3 +3,5 @@
 import {main} from '../models';
 
 export function LoadDirectories(arg1:string):Promise<main.LoadDirs>;
+
+export function LoadDirectory(arg1:string):Promise<Array<main.FileDetails>>;
