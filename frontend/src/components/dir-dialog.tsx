@@ -12,6 +12,8 @@ import { LoadDirectories } from "../../wailsjs/go/main/App";
 import { ArrowLeft, Folder } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router";
+import { useAtomValue } from "jotai";
+import { envAtom } from "@/hooks/environment";
 
 export default function DirDialog(props: { children: ReactNode }) {
   const [directoryPath, setDirectoryPath] = useState<string | undefined>(
@@ -21,22 +23,23 @@ export default function DirDialog(props: { children: ReactNode }) {
   const [path, setPath] = useState<string>();
   const [selectedDirectory, setSelectedDirectory] = useState("");
 
+  const env = useAtomValue(envAtom);
   const navigate = useNavigate();
+  const pathSeparator = env?.platform === "windows" ? "\\" : "/";
 
   const goBack = () => {
     if (path === undefined) {
       return;
     }
-
-    const pathStack = path.split("\\");
+    const pathStack = path.split(pathSeparator);
     pathStack.pop();
-    setDirectoryPath(pathStack.join("\\"));
+    setDirectoryPath(pathStack.join(pathSeparator));
   };
   const getDirectoryName = () => {
     if (path === undefined) {
       return "";
     }
-    const pathStack = path.split("\\");
+    const pathStack = path.split(pathSeparator);
     return pathStack[pathStack.length - 1];
   };
   const loadDirectories = useCallback(async () => {
@@ -58,7 +61,7 @@ export default function DirDialog(props: { children: ReactNode }) {
       return;
     }
     navigate(
-      `/editor?directory=${encodeURIComponent(`${path}\\${selectedDirectory}`)}`
+      `/editor?directory=${encodeURIComponent(`${path}${pathSeparator}${selectedDirectory}`)}`
     );
   };
   useEffect(() => {
@@ -104,14 +107,14 @@ export default function DirDialog(props: { children: ReactNode }) {
                 className={`flex flex-col gap-y-2 items-center p-2 ${
                   selectedDirectory === dir && "bg-slate-200 rounded"
                 }`}
-                onClick={() => {
+                onClick={async () => {
                   if (selectedDirectory === dir) {
                     setSelectedDirectory("");
                     return;
                   }
                   setSelectedDirectory(dir);
                 }}
-                onDoubleClick={() => setDirectoryPath(`${path}\\${dir}`)}
+                onDoubleClick={() => setDirectoryPath(`${path}${pathSeparator}${dir}`)}
               >
                 <Folder className="text-black" size={20} />
                 <span className="text-black text-sm">{dir}</span>
