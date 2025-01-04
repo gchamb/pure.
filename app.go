@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -19,6 +20,7 @@ type FileDetails struct {
 	Name     string `json:"name"`
 	Size     int64  `json:"size"`
 	IsDir    bool   `json:"isDir"`
+	Path	string 	`json:"path"`
 }
 
 // NewApp creates a new App application struct
@@ -70,7 +72,7 @@ func (a *App) LoadDirectory(directoryPath string) []FileDetails {
 	var fileDetails []FileDetails
 	entries, err := os.ReadDir(directoryPath)
 	if err != nil {
-		fmt.Println(err.Error())
+		// fmt.Println(err.Error())
 		return fileDetails
 	}
 
@@ -80,8 +82,18 @@ func (a *App) LoadDirectory(directoryPath string) []FileDetails {
 				Name:  entry.Name(),
 				IsDir: entry.IsDir(),
 				Size:  details.Size(),
+				Path: path.Join(directoryPath, entry.Name()),
 			})
 		}
 	}
 	return fileDetails
+}
+
+func (a *App) LoadFileContents(path string) string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		// fmt.Println(err.Error())
+		return ""
+	}
+	return string(data)
 }

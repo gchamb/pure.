@@ -4,6 +4,7 @@ export namespace main {
 	    name: string;
 	    size: number;
 	    isDir: boolean;
+	    path: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new FileDetails(source);
@@ -14,6 +15,7 @@ export namespace main {
 	        this.name = source["name"];
 	        this.size = source["size"];
 	        this.isDir = source["isDir"];
+	        this.path = source["path"];
 	    }
 	}
 	export class LoadDirs {

@@ -11,6 +11,7 @@ import { ReactNode, useCallback, useEffect, useState } from "react";
 import { LoadDirectories } from "../../wailsjs/go/main/App";
 import { ArrowLeft, Folder } from "lucide-react";
 import { Button } from "./ui/button";
+import { useNavigate } from "react-router";
 
 export default function DirDialog(props: { children: ReactNode }) {
   const [directoryPath, setDirectoryPath] = useState<string | undefined>(
@@ -19,6 +20,8 @@ export default function DirDialog(props: { children: ReactNode }) {
   const [dirs, setDirs] = useState<string[]>([]);
   const [path, setPath] = useState<string>();
   const [selectedDirectory, setSelectedDirectory] = useState("");
+
+  const navigate = useNavigate();
 
   const goBack = () => {
     if (path === undefined) {
@@ -51,8 +54,12 @@ export default function DirDialog(props: { children: ReactNode }) {
     }
   }, [directoryPath]);
   const loadDirectory = () => {
-    // send selected directory to load it in
-    
+    if (path === undefined || selectedDirectory === "") {
+      return;
+    }
+    navigate(
+      `/editor?directory=${encodeURIComponent(`${path}\\${selectedDirectory}`)}`
+    );
   };
   useEffect(() => {
     loadDirectories();

@@ -9,3 +9,7 @@ export function LoadDirectories(arg1) {
 export function LoadDirectory(arg1) {
   return window['go']['main']['App']['LoadDirectory'](arg1);
 }
+
+export function LoadFileContents(arg1) {
+  return window['go']['main']['App']['LoadFileContents'](arg1);
+}
