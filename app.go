@@ -68,7 +68,7 @@ func (a *App) LoadDirectories(directory string) LoadDirs {
 }
 
 func (a *App) LoadDirectory(directoryPath string) []FileDetails {
-	
+	fmt.Println(directoryPath, "here")	
 	var fileDetails []FileDetails
 	entries, err := os.ReadDir(directoryPath)
 	if err != nil {
@@ -92,7 +92,7 @@ func (a *App) LoadDirectory(directoryPath string) []FileDetails {
 func (a *App) LoadFileContents(path string) string {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		// fmt.Println(err.Error())
+		fmt.Println(err.Error())
 		return ""
 	}
 	return string(data)
