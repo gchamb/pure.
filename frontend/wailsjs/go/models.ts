@@ -19,7 +19,7 @@ export namespace main {
 	    }
 	}
 	export class LoadDirs {
-	    Dirs: string[];
+	    dirs: string[];
 	    currentPath: string;
 	
 	    static createFrom(source: any = {}) {
@@ -28,7 +28,7 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.Dirs = source["Dirs"];
+	        this.dirs = source["dirs"];
 	        this.currentPath = source["currentPath"];
 	    }
 	}

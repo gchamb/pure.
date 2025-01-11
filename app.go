@@ -13,7 +13,7 @@ type App struct {
 	ctx context.Context
 }
 type LoadDirs struct {
-	Dirs        []string `json:dirs`
+	Dirs        []string `json:"dirs"`
 	CurrentPath string   `json:"currentPath"`
 }
 type FileDetails struct {
@@ -49,7 +49,7 @@ func (a *App) LoadDirectories(directory string) LoadDirs {
 	} else {
 		selectedDir = directory
 	}
-
+	fmt.Println("selected dir", selectedDir)
 	dirs, err := os.ReadDir(selectedDir)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -92,7 +92,7 @@ func (a *App) LoadDirectory(directoryPath string) []FileDetails {
 func (a *App) LoadFileContents(path string) string {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		fmt.Println(err.Error())
+		// fmt.Println(err.Error())
 		return ""
 	}
 	return string(data)

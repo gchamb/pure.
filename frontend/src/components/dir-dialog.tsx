@@ -14,6 +14,8 @@ import { Button } from "./ui/button";
 import { useNavigate } from "react-router";
 import { useAtomValue } from "jotai";
 import { envAtom } from "@/hooks/environment";
+import { Checkbox } from "./ui/checkbox";
+import { getDirectoryName } from "@/lib/utils";
 
 export default function DirDialog(props: { children: ReactNode }) {
   const [directoryPath, setDirectoryPath] = useState<string | undefined>(
@@ -22,6 +24,7 @@ export default function DirDialog(props: { children: ReactNode }) {
   const [dirs, setDirs] = useState<string[]>([]);
   const [path, setPath] = useState<string>();
   const [selectedDirectory, setSelectedDirectory] = useState("");
+  const [showHidden, setShowHidden] = useState(false);
 
   const env = useAtomValue(envAtom);
   const navigate = useNavigate();
@@ -35,13 +38,7 @@ export default function DirDialog(props: { children: ReactNode }) {
     pathStack.pop();
     setDirectoryPath(pathStack.join(pathSeparator));
   };
-  const getDirectoryName = () => {
-    if (path === undefined) {
-      return "";
-    }
-    const pathStack = path.split(pathSeparator);
-    return pathStack[pathStack.length - 1];
-  };
+
   const loadDirectories = useCallback(async () => {
     try {
       console.log("called", directoryPath, directoryPath ?? "");
@@ -50,8 +47,9 @@ export default function DirDialog(props: { children: ReactNode }) {
       // allow user to click out of directories
       // allow user to select a directory
       const dirs = await LoadDirectories(directoryPath ?? "");
+      console.log(dirs);
       setPath(dirs.currentPath);
-      setDirs(dirs.Dirs);
+      setDirs(dirs.dirs);
     } catch (err) {
       console.log(err);
     }
@@ -61,7 +59,9 @@ export default function DirDialog(props: { children: ReactNode }) {
       return;
     }
     navigate(
-      `/editor?directory=${encodeURIComponent(`${path}${pathSeparator}${selectedDirectory}`)}`
+      `/editor?directory=${encodeURIComponent(
+        `${path}${pathSeparator}${selectedDirectory}`
+      )}`
     );
   };
   useEffect(() => {
@@ -92,35 +92,55 @@ export default function DirDialog(props: { children: ReactNode }) {
             </Button>
           </div>
           <DialogTitle className="text-black text-center">
-            {directoryPath === "" ? "Home" : getDirectoryName()} Directory
+            {directoryPath === ""
+              ? "Home"
+              : getDirectoryName(path, pathSeparator)}{" "}
+            Directory
           </DialogTitle>
+          <div className="absolute right-4 flex flex-col items-center">
+            <label className="text-black text-xs">Hidden</label>
+            <Checkbox
+              checked={showHidden}
+              onCheckedChange={() => setShowHidden((p) => !p)}
+            />
+          </div>
         </DialogHeader>
         <div className="overflow-y-auto max-h-[400px] grid grid-cols-2 gap-6">
-          {dirs.map((dir, index) => {
-            if (dir === "") {
-              return <></>;
-            }
+          {dirs
+            .filter((dir) => {
+              if (showHidden) {
+                return dir;
+              }
+              const dirName = getDirectoryName(dir, pathSeparator);
+              return dirName.charAt(0) !== ".";
+            })
+            .map((dir, index) => {
+              if (dir === "") {
+                return <></>;
+              }
 
-            return (
-              <button
-                key={index}
-                className={`flex flex-col gap-y-2 items-center p-2 ${
-                  selectedDirectory === dir && "bg-slate-200 rounded"
-                }`}
-                onClick={async () => {
-                  if (selectedDirectory === dir) {
-                    setSelectedDirectory("");
-                    return;
+              return (
+                <button
+                  key={index}
+                  className={`flex flex-col gap-y-2 items-center p-2 ${
+                    selectedDirectory === dir && "bg-slate-200 rounded"
+                  }`}
+                  onClick={async () => {
+                    if (selectedDirectory === dir) {
+                      setSelectedDirectory("");
+                      return;
+                    }
+                    setSelectedDirectory(dir);
+                  }}
+                  onDoubleClick={() =>
+                    setDirectoryPath(`${path}${pathSeparator}${dir}`)
                   }
-                  setSelectedDirectory(dir);
-                }}
-                onDoubleClick={() => setDirectoryPath(`${path}${pathSeparator}${dir}`)}
-              >
-                <Folder className="text-black" size={20} />
-                <span className="text-black text-sm">{dir}</span>
-              </button>
-            );
-          })}
+                >
+                  <Folder className="text-black" size={20} />
+                  <span className="text-black text-sm">{dir}</span>
+                </button>
+              );
+            })}
         </div>
         {selectedDirectory && (
           <DialogFooter>

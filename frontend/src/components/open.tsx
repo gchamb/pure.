@@ -1,18 +1,16 @@
 import { FolderOpen, File } from "lucide-react";
 import { useState } from "react";
 import DirDialog from "./dir-dialog";
+import { Button } from "./ui/button";
 
 export default function Open() {
   return (
     <div className="flex gap-x-4">
       <DirDialog>
-        <button className="p-2 border border-white rounded">
+        <Button className="min-w-[100px] min-h-[75px]">
           <FolderOpen size={54} />
-        </button>
+        </Button>
       </DirDialog>
-      <button className="p-2 border border-white rounded" onClick={() => {}}>
-        <File size={54} />
-      </button>
     </div>
   );
 }
