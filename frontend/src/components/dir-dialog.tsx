@@ -1,13 +1,12 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { LoadDirectories } from "../../wailsjs/go/main/App";
 import { ArrowLeft, Folder } from "lucide-react";
 import { Button } from "./ui/button";
@@ -16,57 +15,42 @@ import { useAtomValue } from "jotai";
 import { envAtom } from "@/hooks/environment";
 import { Checkbox } from "./ui/checkbox";
 import { getDirectoryName } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
 export default function DirDialog(props: { children: ReactNode }) {
   const [directoryPath, setDirectoryPath] = useState<string | undefined>(
     undefined
   );
-  const [dirs, setDirs] = useState<string[]>([]);
-  const [path, setPath] = useState<string>();
   const [selectedDirectory, setSelectedDirectory] = useState("");
   const [showHidden, setShowHidden] = useState(false);
 
   const env = useAtomValue(envAtom);
   const navigate = useNavigate();
   const pathSeparator = env?.platform === "windows" ? "\\" : "/";
+  const { data } = useQuery({
+    queryKey: [directoryPath ?? ""],
+    queryFn: () => LoadDirectories(directoryPath ?? ""),
+  });
 
   const goBack = () => {
-    if (path === undefined) {
+    if (data?.currentPath === undefined) {
       return;
     }
-    const pathStack = path.split(pathSeparator);
+    const pathStack = data.currentPath.split(pathSeparator);
     pathStack.pop();
     setDirectoryPath(pathStack.join(pathSeparator));
   };
 
-  const loadDirectories = useCallback(async () => {
-    try {
-      console.log("called", directoryPath, directoryPath ?? "");
-      // get the directories from home
-      // allow user to click into directories
-      // allow user to click out of directories
-      // allow user to select a directory
-      const dirs = await LoadDirectories(directoryPath ?? "");
-      console.log(dirs);
-      setPath(dirs.currentPath);
-      setDirs(dirs.dirs);
-    } catch (err) {
-      console.log(err);
-    }
-  }, [directoryPath]);
   const loadDirectory = () => {
-    if (path === undefined || selectedDirectory === "") {
+    if (data?.currentPath === undefined || selectedDirectory === "") {
       return;
     }
     navigate(
       `/editor?directory=${encodeURIComponent(
-        `${path}${pathSeparator}${selectedDirectory}`
+        `${data.currentPath}${pathSeparator}${selectedDirectory}`
       )}`
     );
   };
-  useEffect(() => {
-    loadDirectories();
-  }, [loadDirectories]);
 
   return (
     <Dialog
@@ -75,9 +59,6 @@ export default function DirDialog(props: { children: ReactNode }) {
           setSelectedDirectory("");
           if (directoryPath !== undefined) {
             setDirectoryPath(undefined);
-            setPath("");
-
-            setDirs([]);
           }
         }
       }}
@@ -94,7 +75,7 @@ export default function DirDialog(props: { children: ReactNode }) {
           <DialogTitle className="text-black text-center">
             {directoryPath === ""
               ? "Home"
-              : getDirectoryName(path, pathSeparator)}{" "}
+              : getDirectoryName(data?.currentPath, pathSeparator)}{" "}
             Directory
           </DialogTitle>
           <div className="absolute right-4 flex flex-col items-center">
@@ -106,7 +87,7 @@ export default function DirDialog(props: { children: ReactNode }) {
           </div>
         </DialogHeader>
         <div className="overflow-y-auto max-h-[400px] grid grid-cols-2 gap-6">
-          {dirs
+          {data?.dirs
             .filter((dir) => {
               if (showHidden) {
                 return dir;
@@ -133,7 +114,9 @@ export default function DirDialog(props: { children: ReactNode }) {
                     setSelectedDirectory(dir);
                   }}
                   onDoubleClick={() =>
-                    setDirectoryPath(`${path}${pathSeparator}${dir}`)
+                    setDirectoryPath(
+                      `${data.currentPath}${pathSeparator}${dir}`
+                    )
                   }
                 >
                   <Folder className="text-black" size={20} />
