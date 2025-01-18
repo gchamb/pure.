@@ -17,10 +17,10 @@ type LoadDirs struct {
 	CurrentPath string   `json:"currentPath"`
 }
 type FileDetails struct {
-	Name     string `json:"name"`
-	Size     int64  `json:"size"`
-	IsDir    bool   `json:"isDir"`
-	Path	string 	`json:"path"`
+	Name  string `json:"name"`
+	Size  int64  `json:"size"`
+	IsDir bool   `json:"isDir"`
+	Path  string `json:"path"`
 }
 
 // NewApp creates a new App application struct
@@ -68,7 +68,7 @@ func (a *App) LoadDirectories(directory string) LoadDirs {
 }
 
 func (a *App) LoadDirectory(directoryPath string) []FileDetails {
-	fmt.Println(directoryPath, "here")	
+	fmt.Println(directoryPath, "here")
 	var fileDetails []FileDetails
 	entries, err := os.ReadDir(directoryPath)
 	if err != nil {
@@ -82,7 +82,7 @@ func (a *App) LoadDirectory(directoryPath string) []FileDetails {
 				Name:  entry.Name(),
 				IsDir: entry.IsDir(),
 				Size:  details.Size(),
-				Path: path.Join(directoryPath, entry.Name()),
+				Path:  path.Join(directoryPath, entry.Name()),
 			})
 		}
 	}
