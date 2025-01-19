@@ -1,10 +1,10 @@
-type RopeLine = {
+export type RopeLine = {
   position: number;
   text: string;
-};
+} 
 
 export class RopeNode {
-  private static readonly TEXT_LIMIT = 30;
+  private static readonly TEXT_LIMIT = 20;
   private left: RopeNode | null;
   private right: RopeNode | null;
   private weight: number;
@@ -33,13 +33,12 @@ export class RopeNode {
 
     const mid = Math.floor(s.length / 2);
     this.left = new RopeNode(s.substring(0, mid));
-    this.right = new RopeNode(s.substring(mid));
-    this.weight = this.left.weight;
+    this.right = new RopeNode(s.substring(mid, s.length));
+    this.weight = mid;
   }
 
   private calculateLineBreaks(): void {
     if (!this.isLeaf()) return;
-
     let pos = -1;
     while ((pos = this.text.indexOf("\n", pos + 1)) !== -1) {
       this.lineBreakIndices.push(pos);
@@ -54,7 +53,7 @@ export class RopeNode {
       const ropeLines: RopeLine[] = [];
       while (start < this.lineBreakIndices.length) {
         const pos = this.lineBreakIndices[start];
-
+        
         ropeLines.push({
           position: pos,
           text: this.text.substring(prev + 1, pos),
@@ -88,7 +87,7 @@ export class RopeNode {
     if (
       leftLines.length > 0 &&
       rightLines.length > 0 &&
-      leftLines[leftLines.length - 1].text.endsWith("\n")
+      !leftLines[leftLines.length - 1].text.endsWith("\n")
     ) {
       // Merge the split line
       const lastLeft = leftLines[leftLines.length - 1];
