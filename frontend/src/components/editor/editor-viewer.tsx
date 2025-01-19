@@ -14,19 +14,18 @@ export default function EditorViewer() {
       return new Rope(contents);
     },
   });
-  console.log(new Array());
-  console.log(new Array(fileContents.data?.getLineCount()).fill(null));
+  console.log(fileContents.data?.getLineCount(), fileContents.data?.getLine(0));
   return (
     <div className="">
       <SidebarTrigger />
       <pre className="text-left">
         {new Array(fileContents.data?.getLineCount())
-          .fill(null)
-          .map((line, index) => {
+          .fill(undefined)
+          .map((_, index) => {
             return (
               <code className="flex gap-x-4">
                 <span>{index + 1}</span>
-                {/* {fileContents.data?.getLine(index)} */}
+                {fileContents.data?.getLine(index)?.text ?? ""}
               </code>
             );
           })}

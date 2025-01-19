@@ -1,3 +1,8 @@
+type RopeLine = {
+  position: number;
+  text: string;
+};
+
 export class RopeNode {
   private static readonly TEXT_LIMIT = 30;
   private left: RopeNode | null;
@@ -5,13 +10,15 @@ export class RopeNode {
   private weight: number;
   private text: string;
   private lineBreakIndices: number[];
+  private lines: RopeLine[];
 
   constructor(s: string) {
     this.left = null;
     this.right = null;
     this.weight = 0;
-    this.text = '';
+    this.text = "";
     this.lineBreakIndices = [];
+    this.lines = [];
 
     if (s.length === 0) {
       return;
@@ -34,32 +41,72 @@ export class RopeNode {
     if (!this.isLeaf()) return;
 
     let pos = -1;
-    while ((pos = this.text.indexOf('\n', pos + 1)) !== -1) {
+    while ((pos = this.text.indexOf("\n", pos + 1)) !== -1) {
       this.lineBreakIndices.push(pos);
     }
   }
 
-  getLineBreaks(): { index: number, isStart: boolean }[] {
+  getLines(): RopeLine[] {
+    // If the leaf node then get the text in between the the new characters
     if (this.isLeaf()) {
-      return this.lineBreakIndices.map(index => ({
-        index,
-        isStart: true
-      }));
+      let prev = -1;
+      let start = 0;
+      const ropeLines: RopeLine[] = [];
+      while (start < this.lineBreakIndices.length) {
+        const pos = this.lineBreakIndices[start];
+
+        ropeLines.push({
+          position: pos,
+          text: this.text.substring(prev + 1, pos),
+        });
+        prev = pos;
+        start += 1;
+      }
+
+      if (prev + 1 < this.text.length) {
+        ropeLines.push({
+          text: this.text.substring(prev + 1),
+          position: this.text.length,
+        });
+      }
+
+      this.lines = ropeLines;
+      return ropeLines;
     }
 
-    const leftBreaks = this.left!.getLineBreaks();
-    const rightBreaks = this.right!.getLineBreaks().map(({ index, isStart }) => ({
-      index: index + this.weight,
-      isStart
-    }));
+    // Get lines from left and right subtrees
+    const leftLines = this.left!.getLines() ?? [];
+    let rightLines = this.right!.getLines() ?? [];
 
-    return [...leftBreaks, ...rightBreaks];
+    // Adjust positions for right subtree
+    const offset = this.weight;
+    for (let i = 0; i < rightLines.length; i++) {
+      rightLines[i].position += offset;
+    }
+
+    // Check if we need to merge the last line of left with first line of right
+    if (
+      leftLines.length > 0 &&
+      rightLines.length > 0 &&
+      leftLines[leftLines.length - 1].text.endsWith("\n")
+    ) {
+      // Merge the split line
+      const lastLeft = leftLines[leftLines.length - 1];
+      const firstRight = rightLines[0];
+      lastLeft.text += firstRight.text;
+      lastLeft.position = firstRight.position;
+
+      // Use remaining right lines
+      rightLines = rightLines.slice(1);
+    }
+
+    return [...leftLines, ...rightLines];
   }
 
   charAt(index: number): string {
     if (this.isLeaf()) {
       if (index >= this.text.length) {
-        throw new Error('Index out of bounds');
+        throw new Error("Index out of bounds");
       }
       return this.text[index];
     }
@@ -85,80 +132,34 @@ export class RopeNode {
 
 export class Rope {
   private root: RopeNode | null;
-  private cachedLineCount: number | null;
-  private cachedLineStarts: number[] | null;
 
-  constructor(s: string = '') {
+  constructor(s: string = "") {
     this.root = s.length > 0 ? new RopeNode(s) : null;
-    this.cachedLineCount = null;
-    this.cachedLineStarts = null;
   }
 
-  private calculateLineInfo(): void {
-    if (!this.root) {
-      this.cachedLineCount = 0;
-      this.cachedLineStarts = [];
+  getLineCount() {
+    return this.root?.getLines().length;
+  }
+  getLine(lineNumber: number): RopeLine | undefined {
+    if (this.root === null) {
       return;
     }
 
-    const lineBreaks = this.root.getLineBreaks();
-    this.cachedLineStarts = [-1, ...lineBreaks.map(b => b.index)];
-    this.cachedLineCount = this.cachedLineStarts.length;
-  }
-
-  getLineCount(): number {
-    if (this.cachedLineCount === null) {
-      this.calculateLineInfo();
-    }
-    return this.cachedLineCount!;
-  }
-
-  getLine(lineNumber: number): string {
-    if (!this.root) {
-      throw new Error('Rope is empty');
-    }
-
-    if (this.cachedLineStarts === null) {
-      this.calculateLineInfo();
-    }
-
-    if (lineNumber < 0 || lineNumber >= this.cachedLineCount!) {
-      throw new Error('Line number out of bounds');
-    }
-
-    const lineStart = this.cachedLineStarts![lineNumber] + 1;
-    const lineEnd = lineNumber < this.cachedLineCount! - 1 
-      ? this.cachedLineStarts![lineNumber + 1]
-      : this.toString().length;
-
-    return this.substring(lineStart, lineEnd);
-  }
-
-  getLineAt(charIndex: number): number {
-    if (!this.root) {
-      throw new Error('Rope is empty');
-    }
-
-    if (this.cachedLineStarts === null) {
-      this.calculateLineInfo();
-    }
-
-    const lineIndex = this.cachedLineStarts!.findIndex(start => start >= charIndex) - 1;
-    return lineIndex >= 0 ? lineIndex : 0;
+    return this.root.getLines()[lineNumber];
   }
 
   charAt(index: number): string {
     if (!this.root) {
-      throw new Error('Rope is empty');
+      throw new Error("Rope is empty");
     }
     return this.root.charAt(index);
   }
 
   substring(start: number, end: number): string {
     if (!this.root) {
-      return '';
+      return "";
     }
-    let result = '';
+    let result = "";
     for (let i = start; i < end; i++) {
       result += this.charAt(i);
     }
@@ -166,6 +167,6 @@ export class Rope {
   }
 
   toString(): string {
-    return this.root ? this.root.toString() : '';
+    return this.root ? this.root.toString() : "";
   }
 }
